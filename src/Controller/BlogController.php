@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 class BlogController extends AbstractController
 {
     /**
-     * @Route("/blog", name="blog")
+     * @Route("/", name="home")
      */
     public function index()
     {
