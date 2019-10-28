@@ -8,10 +8,21 @@
     .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
 </style>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+<div class="container mt-5">
+    {% for post in posts %}
+        <div class="row">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ post.title }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted"></h6>
+                    <!-- <p class="card-text">本文少し表示する</p> -->
+                    <a href="#" class="card-link">もっと読む</a>
 
-    This friendly message is coming from:
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
     <ul>
         <li>Your controller at <code><a href="{{ '/Users/xearts/yokozawa/blog/src/Controller/BlogController.php'|file_link(0) }}">src/Controller/BlogController.php</a></code></li>
         <li>Your template at <code><a href="{{ '/Users/xearts/yokozawa/blog/templates/blog/index.html.twig'|file_link(0) }}">templates/blog/index.html.twig</a></code></li>

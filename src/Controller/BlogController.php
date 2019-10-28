@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 class BlogController extends AbstractController
 {
     /**
-     * @Route("/blog", name="blog")
+     * @Route("/", name="home")
      */
     public function index()
     {
@@ -37,8 +37,8 @@ class BlogController extends AbstractController
         $entityManager = $this->getDoctrine()->getManager();
 
         $newPost = new Post();
-        $newPost -> setTitle('ブログはじめました。');
-        $newPost -> setContent('日々の出来事や趣味などを投稿していきます。');
+        $newPost -> setTitle('1コマの講義に遅刻した。');
+        $newPost -> setContent('電車が遅延したから、遅刻してしまった。');
         $newPost -> setCreatedAt(new \DateTime());
 
         //newPostを保存するためにDoctrineと対話する。
