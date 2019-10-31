@@ -12,6 +12,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use App\Form\PostType;
+use Knp\Component\Pager\PaginatorInterface;
 
 /**
  * Class BlogController
@@ -20,12 +21,32 @@ use App\Form\PostType;
 class BlogController extends AbstractController
 {
     /**
+     * 記事を表示する最初のページの設定
+     *
+     *
      * @Route("/", name="blog_index", methods={"GET"})
      * @param PostRepository $postRepository
+     * @param PaginatorInterface $paginator
      * @return Response
      */
-    public function index(PostRepository $postRepository): Response
+    public function index(PostRepository $postRepository, PaginatorInterface $paginator): Response
     {
+
+        /*
+        $postsQuery = $paginator->createQueryBuilder();
+        $postsQuery -> select("c")
+            ->orderBy("c.created_at", "DESC")
+            ->getQuery();
+
+
+        $posts = $paginator->paginate(
+            $postsQuery,
+            $request->query->getInt('page', 1),
+            5
+        );
+
+           */
+
         //全てのPOSTを取得する。
         $posts = $this->getDoctrine()
             ->getRepository(Post::class)
