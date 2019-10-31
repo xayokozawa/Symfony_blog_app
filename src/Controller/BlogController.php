@@ -7,6 +7,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Post;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
+use App\Form\PostType;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 
 
 class BlogController extends AbstractController
@@ -28,30 +31,39 @@ class BlogController extends AbstractController
     }
 
     /**
-     * @Route("/create-post", name="create_post")
+     * @Route("/create", name="create_post")
      */
-    public function createPost():Response
+    public function create(Request $request):Response
     {
-        //$this->getDoctrine()を通してEntityManagerを取得。
-        //Doctrineを介してデータベースにオブジェクトを保存したり、データベースからオブジェクトを取得したりする。
-        $entityManager = $this->getDoctrine()->getManager();
 
-        $newPost = new Post();
-        $newPost -> setTitle('1コマの講義に遅刻した。');
-        $newPost -> setContent('電車が遅延したから、遅刻してしまった。');
-        $newPost -> setCreatedAt(new \DateTime());
+        $post = new Post();
 
-        //newPostを保存するためにDoctrineと対話する。
-        //newPostを管理下に置く。クエリは作成されない。
-        $entityManager->persist($newPost);
+        $form = $this->createForm(PostType::class,$post);
 
-        //INSERTクエリを実行
-        //newPostオブジェクトのデータはデータベースに存在しないため、entityManagerはINSERTクエリを実行し、テーブルに新しい行を追加する。
-        $entityManager->flush();
+        $form->handleRequest($request);
+        if($form->isSubmitted() && $form->isValid()){
+            $post = $form->getData();
 
-        return new Response('保存しました。');
+            $post->setCreatedAt(new \DateTime());
 
 
+            //$this->getDoctrine()を通してEntityManagerを取得。
+            //Doctrineを介してデータベースにオブジェクトを保存したり、データベースからオブジェクトを取得したりする。
+            $entityManager = $this->getDoctrine()->getManager();
+
+            //newPostを管理下に置く。クエリは作成されない。
+            $entityManager->persist($post);
+
+            //INSERTクエリを実行
+            //newPostオブジェクトのデータはデータベースに存在しないため、entityManagerはINSERTクエリを実行し、テーブルに新しい行を追加する。
+            $entityManager->flush();
+
+            return $this->redirectToRoute('home');
+        }
+
+        return $this->render('blog/create_post.html.twig',[
+           'form' => $form->createView(),
+        ]);
     }
 
 
