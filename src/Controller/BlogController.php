@@ -9,7 +9,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use App\Form\PostType;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 
 
 class BlogController extends AbstractController
@@ -63,6 +62,43 @@ class BlogController extends AbstractController
 
         return $this->render('blog/create_post.html.twig',[
            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/edit/{id}", name="edit_post")
+     *
+     */
+    //postはParamConverterによって自動取得される。
+    public function update(Request $request,Post $post,$id):Response
+    {
+
+        $entityManager = $this->getDoctrine()->getManager();
+
+        $form = $this->createForm(PostType::class,$post);
+        $form->handleRequest($request);
+
+        //postが存在しない場合
+
+        if(!$post){
+            throw $this->createNotFoundException(
+              'No post found for id'.$id
+            );
+        }
+
+        if($form->isSubmitted() && $form->isValid()){
+            $post = $form->getData();
+            // $post->setUpdatedAt(new \DateTime());
+
+            $entityManager->persist($post);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('home');
+        }
+
+        return $this->render('blog/edit_post.html.twig',[
+            'post' => $post,
+            'form' => $form->createView(),
         ]);
     }
 

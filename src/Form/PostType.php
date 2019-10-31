@@ -22,7 +22,7 @@ class PostType extends AbstractType
                 'required' => true,
             ])
             ->add('category',TextType::class,[
-                'required' => true,
+                'required' => false,
             ])
             ->add('save',SubmitType::class)
         ;

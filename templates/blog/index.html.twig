@@ -16,7 +16,7 @@
                     <h5 class="card-title">{{ post.title }}</h5>
                     <h6 class="card-subtitle mb-2 text-muted"></h6>
                     <!-- <p class="card-text">本文少し表示する</p> -->
-                    <a href="#" class="card-link">もっと読む</a>
+                    <a href="{{ path('edit_post',{id:post.id}) }}" class="card-link">編集する</a>
 
                 </div>
             </div>
