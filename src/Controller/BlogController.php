@@ -8,6 +8,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Post;
+use App\Entity\Category;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -62,42 +63,7 @@ class BlogController extends AbstractController
         ]);
     }
 
-    /**
-     * 記事を表示する最初のページの設定
-     *
-     *
-     * @Route("/", name="post_search", methods={"GET"})
-     * @param string $keyword
-     * @param Request $request
-     * @param PostRepository $postRepository
-     * @param PaginatorInterface $paginator
-     * @return Response
-     */
-    public function search(string $keyword, Request $request, PostRepository $postRepository ,PaginatorInterface $paginator): Response
-    {
-
-        $postsQuery = $postRepository->createQueryBuilder('post')
-            -> orderBy("post.created_at", "DESC")
-            -> orWhere('post.title LIKE :keyword')
-            -> orWhere('post.content LIKE :keyword')
-            -> setParameter('keyword', "%".$keyword."%");
-
-
-        $posts = $paginator->paginate(
-            $postsQuery,
-            $request->query->getInt('page', 1),
-            5
-        );
-
-
-        return $this->render('blog/index.html.twig', [
-            'controller_name' => 'BlogController',
-            'posts' => $posts
-        ]);
-    }
-
-
-
+    
     /**
      * 新規記事作成
      *
@@ -111,6 +77,7 @@ class BlogController extends AbstractController
     {
 
         $post = new Post();
+        $category = new Category();
 
         $form = $this->createForm(PostType::class,$post);
 
@@ -120,6 +87,7 @@ class BlogController extends AbstractController
 
             $post->setCreatedAt(new \DateTime());
 
+
             //newPostを管理下に置く。クエリは作成されない。
             $entityManager->persist($post);
 
@@ -127,7 +95,14 @@ class BlogController extends AbstractController
             //newPostオブジェクトのデータはデータベースに存在しないため、entityManagerはINSERTクエリを実行し、テーブルに新しい行を追加する。
             $entityManager->flush();
 
-            return $this->redirectToRoute('blog_index');
+            $name = $request->request->get('post')['category'];
+            dump($name);
+            dump($request);
+            $category->setName($name);
+            $entityManager->persist($category);
+            $entityManager->flush();
+
+           // return $this->redirectToRoute('blog_index');
         }
 
         return $this->render('blog/new.html.twig',[
