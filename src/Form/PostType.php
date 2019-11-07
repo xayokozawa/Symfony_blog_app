@@ -24,8 +24,7 @@ class PostType extends AbstractType
             ->add('category',TextType::class,[
                 'required' => false,
             ])
-            ->add('save',SubmitType::class)
-        ;
+            ->add('save',SubmitType::class);
     }
 
     public function configureOptions(OptionsResolver $resolver)
