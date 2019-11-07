@@ -9,21 +9,33 @@
 <div class="container mt-5">
     {% for post in posts %}
         <div class="row">
-            <div class="card">
+            <div class="card col-12 mb-5" id="post-{{ post.id }}">
                 <div class="card-body">
                     <h5 class="card-title">{{ post.title }}</h5>
-                    <h6 class="card-subtitle mb-2 text-muted"></h6>
-                    <!-- <p class="card-text">本文少し表示する</p> -->
-                    <a href="{{ path('post_edit',{id:post.id}) }}" class="card-link">編集する</a>
+                    <a href="{{ path('post_show', {id:post.id}) }}" class="card-link">読む</a>
+                    <div class="row">
+                        <h6 class="card-subtitle mb-2 text-muted"></h6>
+                        <!-- <p class="card-text">本文少し表示する</p> -->
+                        <div class="col-5"><h6>{{ post.createdAt ? post.createdAt|date('Y-m-d H:i:s') : ''  }}</h6></div>
+                        <div class="col-5"><h6>カテゴリー:{{ post.category }}</h6></div>
+                        <div class="col-2 ml-auto">
+                            <a href="{{ path('post_edit',{id:post.id}) }}" class="card-link">編集する</a>
+                        </div>
+                    </div>
 
                 </div>
             </div>
         </div>
     {% endfor %}
 
+    <div class="navigation">
+        {{ knp_pagination_render(posts) }}
+    </div>
+    <!--
     <ul>
         <li>Your controller at <code><a href="{{ '/Users/xearts/yokozawa/blog/src/Controller/BlogController.php'|file_link(0) }}">src/Controller/BlogController.php</a></code></li>
         <li>Your template at <code><a href="{{ '/Users/xearts/yokozawa/blog/templates/blog/index.html.twig'|file_link(0) }}">templates/blog/index.html.twig</a></code></li>
     </ul>
+    -->
 </div>
 {% endblock %}
