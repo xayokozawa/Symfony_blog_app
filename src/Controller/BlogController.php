@@ -29,14 +29,11 @@ class BlogController extends AbstractController
      * @param PaginatorInterface $paginator
      * @return Response
      */
-    public function index(PostRepository $postRepository, PaginatorInterface $paginator): Response
+    public function index(Request $request, PostRepository $postRepository ,PaginatorInterface $paginator): Response
     {
 
-        /*
-        $postsQuery = $paginator->createQueryBuilder();
-        $postsQuery -> select("c")
-            ->orderBy("c.created_at", "DESC")
-            ->getQuery();
+        $postsQuery = $postRepository->createQueryBuilder('post')
+            ->orderBy("post.created_at", "DESC");
 
 
         $posts = $paginator->paginate(
@@ -45,12 +42,6 @@ class BlogController extends AbstractController
             5
         );
 
-           */
-
-        //全てのPOSTを取得する。
-        $posts = $this->getDoctrine()
-            ->getRepository(Post::class)
-            ->findAll();
 
         return $this->render('blog/index.html.twig', [
             'controller_name' => 'BlogController',
@@ -87,7 +78,7 @@ class BlogController extends AbstractController
             //newPostオブジェクトのデータはデータベースに存在しないため、entityManagerはINSERTクエリを実行し、テーブルに新しい行を追加する。
             $entityManager->flush();
 
-            return $this->redirectToRoute('home');
+            return $this->redirectToRoute('blog_index');
         }
 
         return $this->render('blog/new.html.twig',[
