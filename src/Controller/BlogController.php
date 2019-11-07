@@ -24,7 +24,8 @@ class BlogController extends AbstractController
      * 記事を表示する最初のページの設定
      *
      *
-     * @Route("/", name="blog_index", methods={"GET"})
+     * @Route("/", name="blog_index", methods={"GET","POST"})
+     * @param Request $request
      * @param PostRepository $postRepository
      * @param PaginatorInterface $paginator
      * @return Response
@@ -32,8 +33,20 @@ class BlogController extends AbstractController
     public function index(Request $request, PostRepository $postRepository ,PaginatorInterface $paginator): Response
     {
 
-        $postsQuery = $postRepository->createQueryBuilder('post')
-            ->orderBy("post.created_at", "DESC");
+        if($request->request->get('keyword'))
+        {
+            dump($request->request->get('keyword'));
+            $keyword = $request->request->get('keyword');
+            $postsQuery = $postRepository->createQueryBuilder('post')
+                -> orderBy("post.created_at", "DESC")
+                -> orWhere('post.category LIKE :keyword')
+                -> orWhere('post.content LIKE :keyword')
+                -> orWhere('post.title LIKE :keyword')
+                -> setParameter('keyword', "%".$keyword."%");
+        } else {
+            $postsQuery = $postRepository->createQueryBuilder('post')
+                ->orderBy("post.created_at", "DESC");
+        }
 
 
         $posts = $paginator->paginate(
@@ -50,7 +63,43 @@ class BlogController extends AbstractController
     }
 
     /**
-     * 記事の
+     * 記事を表示する最初のページの設定
+     *
+     *
+     * @Route("/", name="post_search", methods={"GET"})
+     * @param string $keyword
+     * @param Request $request
+     * @param PostRepository $postRepository
+     * @param PaginatorInterface $paginator
+     * @return Response
+     */
+    public function search(string $keyword, Request $request, PostRepository $postRepository ,PaginatorInterface $paginator): Response
+    {
+
+        $postsQuery = $postRepository->createQueryBuilder('post')
+            -> orderBy("post.created_at", "DESC")
+            -> orWhere('post.title LIKE :keyword')
+            -> orWhere('post.content LIKE :keyword')
+            -> setParameter('keyword', "%".$keyword."%");
+
+
+        $posts = $paginator->paginate(
+            $postsQuery,
+            $request->query->getInt('page', 1),
+            5
+        );
+
+
+        return $this->render('blog/index.html.twig', [
+            'controller_name' => 'BlogController',
+            'posts' => $posts
+        ]);
+    }
+
+
+
+    /**
+     * 新規記事作成
      *
      * @Route("/new", name="post_new", methods={"GET","POST"})
      * @param Request $request
