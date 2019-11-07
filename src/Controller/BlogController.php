@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Repository\CategoryRepository;
 use App\Repository\PostRepository;
+use App\Repository\CategoryRepositoryRepository;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,11 +30,14 @@ class BlogController extends AbstractController
      * @Route("/", name="blog_index", methods={"GET","POST"})
      * @param Request $request
      * @param PostRepository $postRepository
+     * @param CategoryRepository $catogoryRepository
      * @param PaginatorInterface $paginator
      * @return Response
      */
-    public function index(Request $request, PostRepository $postRepository ,PaginatorInterface $paginator): Response
+    public function index(Request $request, PostRepository $postRepository ,CategoryRepository $categoryRepository, PaginatorInterface $paginator): Response
     {
+
+
 
         if($request->request->get('keyword'))
         {
@@ -56,10 +61,13 @@ class BlogController extends AbstractController
             5
         );
 
+        $categories = $categoryRepository->findAll();
+
 
         return $this->render('blog/index.html.twig', [
             'controller_name' => 'BlogController',
-            'posts' => $posts
+            'posts' => $posts,
+            'categories' => $categories
         ]);
     }
 
