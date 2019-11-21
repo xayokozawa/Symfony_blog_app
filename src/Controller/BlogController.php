@@ -2,12 +2,15 @@
 
 namespace App\Controller;
 
+use App\Repository\CategoryRepository;
 use App\Repository\PostRepository;
+use App\Repository\CategoryRepositoryRepository;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Post;
+use App\Entity\Category;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,19 +27,32 @@ class BlogController extends AbstractController
      * 記事を表示する最初のページの設定
      *
      *
-     * @Route("/", name="blog_index", methods={"GET"})
+     * @Route("/", name="blog_index", methods={"GET","POST"})
+     * @param Request $request
      * @param PostRepository $postRepository
+     * @param CategoryRepository $catogoryRepository
      * @param PaginatorInterface $paginator
      * @return Response
      */
-    public function index(PostRepository $postRepository, PaginatorInterface $paginator): Response
+    public function index(Request $request, PostRepository $postRepository ,CategoryRepository $categoryRepository, PaginatorInterface $paginator): Response
     {
 
-        /*
-        $postsQuery = $paginator->createQueryBuilder();
-        $postsQuery -> select("c")
-            ->orderBy("c.created_at", "DESC")
-            ->getQuery();
+
+
+        if($request->request->get('keyword'))
+        {
+            dump($request->request->get('keyword'));
+            $keyword = $request->request->get('keyword');
+            $postsQuery = $postRepository->createQueryBuilder('post')
+                -> orderBy("post.created_at", "DESC")
+                -> orWhere('post.category LIKE :keyword')
+                -> orWhere('post.content LIKE :keyword')
+                -> orWhere('post.title LIKE :keyword')
+                -> setParameter('keyword', "%".$keyword."%");
+        } else {
+            $postsQuery = $postRepository->createQueryBuilder('post')
+                ->orderBy("post.created_at", "DESC");
+        }
 
 
         $posts = $paginator->paginate(
@@ -45,21 +61,19 @@ class BlogController extends AbstractController
             5
         );
 
-           */
+        $categories = $categoryRepository->findAll();
 
-        //全てのPOSTを取得する。
-        $posts = $this->getDoctrine()
-            ->getRepository(Post::class)
-            ->findAll();
 
         return $this->render('blog/index.html.twig', [
             'controller_name' => 'BlogController',
-            'posts' => $posts
+            'posts' => $posts,
+            'categories' => $categories
         ]);
     }
 
+    
     /**
-     * 記事の
+     * 新規記事作成
      *
      * @Route("/new", name="post_new", methods={"GET","POST"})
      * @param Request $request
@@ -71,6 +85,7 @@ class BlogController extends AbstractController
     {
 
         $post = new Post();
+        $category = new Category();
 
         $form = $this->createForm(PostType::class,$post);
 
@@ -80,6 +95,7 @@ class BlogController extends AbstractController
 
             $post->setCreatedAt(new \DateTime());
 
+
             //newPostを管理下に置く。クエリは作成されない。
             $entityManager->persist($post);
 
@@ -87,7 +103,14 @@ class BlogController extends AbstractController
             //newPostオブジェクトのデータはデータベースに存在しないため、entityManagerはINSERTクエリを実行し、テーブルに新しい行を追加する。
             $entityManager->flush();
 
-            return $this->redirectToRoute('home');
+            $name = $request->request->get('post')['category'];
+            dump($name);
+            dump($request);
+            $category->setName($name);
+            $entityManager->persist($category);
+            $entityManager->flush();
+
+           // return $this->redirectToRoute('blog_index');
         }
 
         return $this->render('blog/new.html.twig',[
